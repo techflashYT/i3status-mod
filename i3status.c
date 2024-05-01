@@ -406,9 +406,11 @@ int main(int argc, char *argv[]) {
 
     cfg_opt_t temp_opts[] = {
         CFG_STR("format", "%degrees C", CFGF_NONE),
+        CFG_STR("format_above_degraded_threshold", NULL, CFGF_NONE),
         CFG_STR("format_above_threshold", NULL, CFGF_NONE),
         CFG_STR("path", NULL, CFGF_NONE),
-        CFG_INT("max_threshold", 75, CFGF_NONE),
+        CFG_INT("degraded_threshold", 75, CFGF_NONE),
+        CFG_INT("max_threshold", 85, CFGF_NONE),
         CFG_CUSTOM_ALIGN_OPT,
         CFG_CUSTOM_COLOR_OPTS,
         CFG_CUSTOM_MIN_WIDTH_OPT,
@@ -909,7 +911,9 @@ int main(int argc, char *argv[]) {
                     .path = cfg_getstr(sec, "path"),
                     .format = cfg_getstr(sec, "format"),
                     .format_above_threshold = cfg_getstr(sec, "format_above_threshold"),
+                    .format_above_degraded_threshold = cfg_getstr(sec, "format_above_degraded_threshold"),
                     .max_threshold = cfg_getint(sec, "max_threshold"),
+                    .degraded_threshold = cfg_getint(sec, "degraded_threshold")
                 };
                 print_cpu_temperature_info(&ctx);
                 SEC_CLOSE_MAP;

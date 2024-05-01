@@ -355,7 +355,9 @@ typedef struct {
     const char *path;
     const char *format;
     const char *format_above_threshold;
+    const char *format_above_degraded_threshold;
     int max_threshold;
+    int degraded_threshold;
 } cpu_temperature_ctx_t;
 
 void print_cpu_temperature_info(cpu_temperature_ctx_t *ctx);
