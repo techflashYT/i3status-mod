@@ -248,6 +248,14 @@ void print_cpu_temperature_info(cpu_temperature_ctx_t *ctx) {
         if (ctx->format_above_threshold != NULL)
             selected_format = ctx->format_above_threshold;
     }
+    else if (temperature.raw_value >= ctx->degraded_threshold) {
+        START_COLOR("color_degraded");
+        colorful_output = true;
+        if (ctx->format_above_threshold != NULL)
+            selected_format = ctx->format_above_degraded_threshold;
+    }
+
+
 
     char string_degrees[STRING_SIZE];
     snprintf(string_degrees, STRING_SIZE, "%s", temperature.formatted_value);
