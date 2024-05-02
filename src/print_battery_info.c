@@ -691,6 +691,10 @@ void print_battery_info(battery_info_ctx_t *ctx) {
         default:
             statusstr = ctx->status_unk;
     }
+
+    // the battery won't report anything other than "Not Charging" here, and even that
+    // isn't always consistent.  Check for a dead battery by double checking if the
+    // percentage is 0 instead, which should be the case for every dead battery.
     if (batt_info.percentage_remaining == 0) {
         START_COLOR("color_bad");
         colorful_output = true;
