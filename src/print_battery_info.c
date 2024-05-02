@@ -277,7 +277,7 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
     }
 
     state = sysctl_rslt;
-    if (state == 0 && batt_info->percentage_remaining == 100)
+    if (state == 0 && batt_info->percentage_remaining > 99.4)
         batt_info->status = CS_FULL;
     else if ((state & ACPI_BATT_STAT_CHARGING) && batt_info->percentage_remaining < 100)
         batt_info->status = CS_CHARGING;
@@ -687,11 +687,12 @@ void print_battery_info(battery_info_ctx_t *ctx) {
             break;
         case CS_IDLE:
             if (ctx->override_idle) {
-                if (batt_info.percentage_remaining == 100) {
+                if (batt_info.percentage_remaining > 99.4) {
                     statusstr = ctx->status_full;
-                    break;
                 }
-                statusstr = ctx->status_bat;
+                else {
+                    statusstr = ctx->status_bat;
+                }
                 break;
             }
             statusstr = ctx->status_idle;
