@@ -274,6 +274,7 @@ typedef struct {
     const char *status_full;
     const char *status_idle;
     const char *status_empty;
+    bool override_idle;
     int low_threshold;
     char *threshold_type;
     bool last_full_capacity;

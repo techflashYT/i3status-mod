@@ -686,6 +686,14 @@ void print_battery_info(battery_info_ctx_t *ctx) {
             statusstr = ctx->status_full;
             break;
         case CS_IDLE:
+            if (ctx->override_idle) {
+                if (batt_info.percentage_remaining == 100) {
+                    statusstr = ctx->status_full;
+                    break;
+                }
+                statusstr = ctx->status_bat;
+                break;
+            }
             statusstr = ctx->status_idle;
             break;
         default:
