@@ -635,6 +635,7 @@ void print_battery_info(battery_info_ctx_t *ctx) {
         return;
     }
 
+
     if (batt_info.percentage_remaining < 0) {
         batt_info.percentage_remaining = (((float)batt_info.remaining / (float)full) * 100);
         /* Some batteries report POWER_SUPPLY_CHARGE_NOW=<full_design> when fully
@@ -689,6 +690,11 @@ void print_battery_info(battery_info_ctx_t *ctx) {
             break;
         default:
             statusstr = ctx->status_unk;
+    }
+    if (batt_info.percentage_remaining == 0) {
+        START_COLOR("color_bad");
+        colorful_output = true;
+        statusstr = ctx->status_empty;
     }
     snprintf(string_status, STRING_SIZE, "%s", statusstr);
     snprintf(string_percentage, STRING_SIZE, ctx->format_percentage, batt_info.percentage_remaining, pct_mark);

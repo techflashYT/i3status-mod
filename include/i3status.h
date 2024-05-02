@@ -267,11 +267,13 @@ typedef struct {
     const char *path;
     const char *format;
     const char *format_down;
+    const char *format_empty;
     const char *status_chr;
     const char *status_bat;
     const char *status_unk;
     const char *status_full;
     const char *status_idle;
+    const char *status_empty;
     int low_threshold;
     char *threshold_type;
     bool last_full_capacity;
