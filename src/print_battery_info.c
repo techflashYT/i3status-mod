@@ -149,7 +149,8 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
 #if defined(__linux__)
     char buf[1024];
     const char *walk, *last;
-    bool watt_as_unit = false;
+    bool watt_as_unit_capacity = false;
+    bool watt_as_unit_rate = false;
     int voltage = -1;
     char batpath[512];
     sprintf(batpath, path, number);
@@ -175,18 +176,19 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
             continue;
 
         if (BEGINS_WITH(last, "POWER_SUPPLY_ENERGY_NOW=")) {
-            watt_as_unit = true;
+            watt_as_unit_capacity = true;
             batt_info->remaining = atoi(walk + 1);
             batt_info->percentage_remaining = -1;
         } else if (BEGINS_WITH(last, "POWER_SUPPLY_CHARGE_NOW=")) {
-            watt_as_unit = false;
+            watt_as_unit_capacity = false;
             batt_info->remaining = atoi(walk + 1);
             batt_info->percentage_remaining = -1;
-        } else if (BEGINS_WITH(last, "POWER_SUPPLY_CAPACITY=") && batt_info->remaining == -1) {
+        } else if (BEGINS_WITH(last, "POWER_SUPPLY_CAPACITY=") && batt_info->remaining == -1)
             batt_info->percentage_remaining = atoi(walk + 1);
-        } else if (BEGINS_WITH(last, "POWER_SUPPLY_CURRENT_NOW="))
+        else if (BEGINS_WITH(last, "POWER_SUPPLY_CURRENT_NOW=")) {
+            watt_as_unit_rate = false;
             batt_info->present_rate = abs(atoi(walk + 1));
-        else if (BEGINS_WITH(last, "POWER_SUPPLY_VOLTAGE_NOW="))
+        } else if (BEGINS_WITH(last, "POWER_SUPPLY_VOLTAGE_NOW="))
             voltage = abs(atoi(walk + 1));
         else if (BEGINS_WITH(last, "POWER_SUPPLY_TIME_TO_EMPTY_NOW="))
             batt_info->seconds_remaining = abs(atoi(walk + 1)) * 60;
@@ -194,8 +196,10 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
          * it is the same as POWER_SUPPLY_CURRENT_NOW but with μWh as
          * unit instead of μAh. We will calculate it as we need it
          * later. */
-        else if (BEGINS_WITH(last, "POWER_SUPPLY_POWER_NOW="))
+        else if (BEGINS_WITH(last, "POWER_SUPPLY_POWER_NOW=")) {
+            watt_as_unit_rate = true;
             batt_info->present_rate = abs(atoi(walk + 1));
+        }
         else if (BEGINS_WITH(last, "POWER_SUPPLY_STATUS=Charging"))
             batt_info->status = CS_CHARGING;
         else if (BEGINS_WITH(last, "POWER_SUPPLY_STATUS=Full"))
@@ -218,10 +222,7 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
      * POWER_SUPPLY_CHARGE_NOW is the unit of measurement. The energy is
      * given in mWh, the charge in mAh. So calculate every value given in
      * ampere to watt */
-    if (!watt_as_unit && voltage >= 0) {
-        if (batt_info->present_rate > 0) {
-            batt_info->present_rate = (((float)voltage / 1000.0) * ((float)batt_info->present_rate / 1000.0));
-        }
+    if (!watt_as_unit_capacity && voltage >= 0) {
         if (batt_info->remaining > 0) {
             batt_info->remaining = (((float)voltage / 1000.0) * ((float)batt_info->remaining / 1000.0));
         }
@@ -230,6 +231,11 @@ static bool slurp_battery_info(battery_info_ctx_t *ctx, struct battery_info *bat
         }
         if (batt_info->full_last > 0) {
             batt_info->full_last = (((float)voltage / 1000.0) * ((float)batt_info->full_last / 1000.0));
+        }
+    }
+    if (!watt_as_unit_rate && voltage >= 0) {
+        if (batt_info->present_rate > 0) {
+            batt_info->present_rate = (((float)voltage / 1000.0) * ((float)batt_info->present_rate / 1000.0));
         }
     }
 #elif defined(__DragonFly__)
